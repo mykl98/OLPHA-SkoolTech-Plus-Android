@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Skooltech Solutions Academy</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_notification">Notification</string>
+    <string name="title_announcement">Announcement</string>
+    <string name="title_attendance">Attendance</string>
+    <string name="title_profile">Me</string>
+
+    <string name="school_name">Skooltech Solutions Academy</string>
+    <string name="school_address">Block 16 lot 18-19 Belair Subdivision Buru-un Iligan City</string>
+    <string name="school_code">388rv2m36ac41q5</string>
+
+    <string name="app_api">http://skooltech.com/client/app-api/index.php</string>
+</resources>

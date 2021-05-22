@@ -1,0 +1,64 @@
+{
+  "project_info": {
+    "project_number": "429938865904",
+    "firebase_url": "https://olpha-a1a05.firebaseio.com",
+    "project_id": "olpha-a1a05",
+    "storage_bucket": "olpha-a1a05.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429938865904:android:b490d32468219ac9047435",
+        "android_client_info": {
+          "package_name": "com.skooltech.olpha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "429938865904-t8mrfpb7plurngpqru3igb6n82u92ggq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skooltech.olpha",
+            "certificate_hash": "b9ba57ea15ca4aaa46793ca94b1808eb439fb69f"
+          }
+        },
+        {
+          "client_id": "429938865904-fak1h864h0qn1itse4f80jo3gmftsel1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skooltech.olpha",
+            "certificate_hash": "b5cbe37b1b6b9c932c52311236d5ffeb4243866a"
+          }
+        },
+        {
+          "client_id": "429938865904-0avohdh5b0juus1t7k4dqav0v3ojuc2v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skooltech.olpha",
+            "certificate_hash": "529f3b3c12f2005a06ada8013ec2f6d4da3f25dd"
+          }
+        },
+        {
+          "client_id": "429938865904-9vgdmdh9i8etlr0uic2bq51fe633jc11.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB0ImX0Un3ZwInge0ASSmZkmzK0Rx2-Kk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "429938865904-9vgdmdh9i8etlr0uic2bq51fe633jc11.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
