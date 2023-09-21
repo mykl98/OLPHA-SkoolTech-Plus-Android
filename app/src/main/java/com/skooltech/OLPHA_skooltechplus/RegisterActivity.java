@@ -1,8 +1,15 @@
 package com.skooltech.OLPHA_skooltechplus;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,8 +35,13 @@ public class RegisterActivity extends AppCompatActivity{
 
     private ProgressBar progressBar;
 
+    private int count = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkPermission();
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
@@ -101,4 +113,40 @@ public class RegisterActivity extends AppCompatActivity{
         requestQueue.getCache().clear();
         requestQueue.add(postRequest);
     }
+
+    public void checkPermission() {
+        if (ContextCompat.checkSelfPermission(RegisterActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+
+            // Requesting the permission
+            ActivityCompat.requestPermissions(RegisterActivity.this, new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 100);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode,
+                permissions,
+                grantResults);
+
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            }
+            else {
+                if(count == 0){
+                    Toast.makeText(RegisterActivity.this, "POST NOTIFICATION permission should be granted.", Toast.LENGTH_LONG) .show();
+                }else if(count == 1){
+                    Toast.makeText(RegisterActivity.this, "The app won't function properly if the POST Notification permission is not granted.\nThe app will exit if the POST Notification permission is not granted!", Toast.LENGTH_LONG) .show();
+                }else {
+                    Toast.makeText(RegisterActivity.this, "Uninstall the app and approved this POST Notification permission!", Toast.LENGTH_LONG) .show();
+                    finish();
+                }
+                count ++;
+                ActivityCompat.requestPermissions(RegisterActivity.this, new String[] { Manifest.permission.POST_NOTIFICATIONS }, 100);
+
+            }
+        }
+    }
+
 }
