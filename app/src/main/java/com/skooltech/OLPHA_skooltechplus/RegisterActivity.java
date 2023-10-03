@@ -114,6 +114,7 @@ public class RegisterActivity extends AppCompatActivity{
         requestQueue.add(postRequest);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void checkPermission() {
         if (ContextCompat.checkSelfPermission(RegisterActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
 

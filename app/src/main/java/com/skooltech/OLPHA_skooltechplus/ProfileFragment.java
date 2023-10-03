@@ -146,7 +146,7 @@ public class ProfileFragment extends Fragment {
 
         //get token
         MyFirebaseMessagingService mFMS = new MyFirebaseMessagingService();
-        final String token = MyFirebaseMessagingService.getToken(getActivity());
+        String token = getActivity().getSharedPreferences("app", Context.MODE_PRIVATE).getString("fb", "");
 
         setSetting("syncDate", getDate());
 

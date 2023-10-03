@@ -1,5 +1,7 @@
 package com.skooltech.OLPHA_skooltechplus;
 
+import static com.google.android.material.internal.ContextUtils.getActivity;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -98,6 +100,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         @Override
         public void onVerificationFailed(FirebaseException e) {
             Toast.makeText(VerifyPhoneActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.d("test1234", e.getMessage());
         }
 
         @Override
@@ -147,7 +150,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 
         //get token
         MyFirebaseMessagingService mFMS = new MyFirebaseMessagingService();
-        final String token = MyFirebaseMessagingService.getToken(VerifyPhoneActivity.this);
+        final String token = getSharedPreferences("app", Context.MODE_PRIVATE).getString("fb", "");
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

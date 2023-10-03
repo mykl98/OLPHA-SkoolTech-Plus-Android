@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "154743079564",
-    "project_id": "skooltech-pro-olpha",
-    "storage_bucket": "skooltech-pro-olpha.appspot.com"
+    "project_number": "495836462799",
+    "project_id": "olpha-skooltech-plus",
+    "storage_bucket": "olpha-skooltech-plus.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:154743079564:android:220539dca33fbbd294f1a9",
+        "mobilesdk_app_id": "1:495836462799:android:e229e40e9b5f910b7841ba",
         "android_client_info": {
           "package_name": "com.skooltech.OLPHA_skooltechplus"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "154743079564-vp8h3fg20gobv040k89huufoq7ka22lq.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAw3zXuP27RlqXr8JDpWF_A_aJxfnvF9nM"
+          "current_key": "AIzaSyCu3uQzubijACaGlZ_k-bLcDai9pIj3XH4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "154743079564-vp8h3fg20gobv040k89huufoq7ka22lq.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

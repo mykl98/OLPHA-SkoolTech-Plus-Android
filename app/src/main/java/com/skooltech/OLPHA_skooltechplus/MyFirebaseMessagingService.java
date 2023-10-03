@@ -1,22 +1,15 @@
 package com.skooltech.OLPHA_skooltechplus;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -61,11 +54,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         super.onNewToken(token);
-        getSharedPreferences("_", MODE_PRIVATE).edit().putString("fb", token).apply();
+        getSharedPreferences("app", MODE_PRIVATE).edit().putString("fb", token).apply();
     }
 
-    public static String getToken(Context context) {
-        return FirebaseInstanceId.getInstance().getToken();
+    public String getToken() {
+        //return FirebaseInstanceId.getInstance().getToken();
+        String token = getSharedPreferences("app", MODE_PRIVATE).getString("fb", "");
+        return token;
     }
 
     private void generateNotification(String title, String messageBody) {
