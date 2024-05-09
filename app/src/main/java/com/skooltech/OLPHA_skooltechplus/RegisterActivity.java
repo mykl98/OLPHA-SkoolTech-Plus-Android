@@ -1,22 +1,17 @@
 package com.skooltech.OLPHA_skooltechplus;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,125 +24,138 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity{
+    RequestQueue requestQueue;
 
-    private EditText editTextNumber;
-    private Button buttonContinue;
+    EditText phoneNumber;
+    Button continueButton;
 
-    private ProgressBar progressBar;
+    LinearLayout statusContainer;
+    TextView statusText;
 
-    private int count = 0;
+    String TAG = "MainActivity";
+
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            checkPermission();
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        editTextNumber = findViewById(R.id.editTextNumber);
-        buttonContinue = findViewById(R.id.buttonContinue);
-
-        buttonContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkNumber();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 1);
             }
-        });
-
-        progressBar = findViewById(R.id.progressBarValidating);
-        progressBar.setVisibility(View.GONE);
-    }
-
-    public void checkNumber(){
-        progressBar.setVisibility(View.VISIBLE);
-        final String number = editTextNumber.getText().toString().trim();
-
-        if(number.isEmpty() || number.length() < 11){
-            editTextNumber.setError("Enter a valid mobile number");
-            editTextNumber.requestFocus();
-            return;
         }
 
+        sharedPreferences = getSharedPreferences("skooltech", MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+        phoneNumber = findViewById(R.id.register_activity_phone_number);
+        continueButton = findViewById(R.id.register_activity_continue_button);
+        statusContainer = findViewById(R.id.register_activity_status_container);
+        statusText = findViewById(R.id.register_activity_status_text);
+
+        phoneNumber.requestFocus();
+
+        continueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String number = phoneNumber.getText().toString().trim();
+                showStatus("Checking phone number... ");
+                if(number.isEmpty()){
+                    phoneNumber.setError("Phone number field should not be empty!");
+                }else if(number.length() != 11){
+                    phoneNumber.setError("Invalid phone number!");
+                }else{
+                    continueButton.setEnabled(false);
+                    HashMap<String, String> params= new HashMap<>();
+                    params.put("activity", "validate");
+                    params.put("id", getResources().getString(R.string.school_code));
+                    params.put("number", number);
+
+                    requestAPI(params, new APICallback() {
+                        @Override
+                        public void onSuccess(String result) {
+                            continueButton.setEnabled(true);
+                            if(result.equals("true")){
+                                editor.putString("number", number);
+                                editor.commit();
+                                gotoVerifyNumberActivity();
+                            }else if(result.equals("false")){
+                                phoneNumber.setError("Unauthorized phone number!");
+                            }
+                            hideStatus();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            continueButton.setEnabled(true);
+                            phoneNumber.setError(error);
+                            hideStatus();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void gotoVerifyNumberActivity(){
+        Intent intent = new Intent(RegisterActivity.this, VerifyNumberActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void showStatus(String text){
+        statusContainer.setVisibility(View.VISIBLE);
+        statusText.setText(text);
+    }
+
+    private void hideStatus(){
+        statusContainer.setVisibility(View.GONE);
+    }
+
+    private void requestAPI(Map<String, String> parameters, final RegisterActivity.APICallback callback){
         String url = getString(R.string.app_api);
-        final String schoolCode = getString(R.string.school_code);
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        progressBar.setVisibility(View.GONE);
-                        if(response.equals("false")){
-                            editTextNumber.setError("Unauthorized number. Use the number you provide during enrollment.");
-                            editTextNumber.requestFocus();
-                        }else if(response.equals("true")){
-                            Intent intent = new Intent(RegisterActivity.this,VerifyPhoneActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.putExtra("number",number);
-                            startActivity(intent);
+                        String[] resp = response.split("\\*_\\*");
+                        if(resp[0].equals("true")){
+                            callback.onSuccess("true");
+                        }else if(resp[0].equals("false")){
+                            callback.onSuccess("false");
                         }else{
-                            Toast.makeText(RegisterActivity.this, response, Toast.LENGTH_LONG).show();
+                            callback.onError(response);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(RegisterActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+                        callback.onError(error.getLocalizedMessage());
                     }
                 }
         ){
             @Override
-            protected Map<String,String> getParams()
-            {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("activity","validate");
-                params.put("id",schoolCode);
-                params.put("number",number);
-
-                return params;
+            protected Map<String,String> getParams() {
+                return parameters;
             }
         };
-        RequestQueue requestQueue = Volley.newRequestQueue(RegisterActivity.this);
+
+        if(requestQueue == null){
+            requestQueue = Volley.newRequestQueue(RegisterActivity.this);
+        }
         requestQueue.getCache().clear();
         requestQueue.add(postRequest);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public void checkPermission() {
-        if (ContextCompat.checkSelfPermission(RegisterActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+    public interface APICallback{
+        void onSuccess(String result);
 
-            // Requesting the permission
-            ActivityCompat.requestPermissions(RegisterActivity.this, new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 100);
-        }
+        void onError(String error);
     }
-
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode,
-                permissions,
-                grantResults);
-
-        if (requestCode == 100) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            }
-            else {
-                if(count == 0){
-                    Toast.makeText(RegisterActivity.this, "POST NOTIFICATION permission should be granted.", Toast.LENGTH_LONG) .show();
-                }else if(count == 1){
-                    Toast.makeText(RegisterActivity.this, "The app won't function properly if the POST Notification permission is not granted.\nThe app will exit if the POST Notification permission is not granted!", Toast.LENGTH_LONG) .show();
-                }else {
-                    Toast.makeText(RegisterActivity.this, "Uninstall the app and approved this POST Notification permission!", Toast.LENGTH_LONG) .show();
-                    finish();
-                }
-                count ++;
-                ActivityCompat.requestPermissions(RegisterActivity.this, new String[] { Manifest.permission.POST_NOTIFICATIONS }, 100);
-
-            }
-        }
-    }
-
 }
+

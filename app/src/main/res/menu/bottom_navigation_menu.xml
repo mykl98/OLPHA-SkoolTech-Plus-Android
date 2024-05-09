@@ -3,25 +3,26 @@
     <item
         android:id="@+id/bottom_nav_home"
         android:icon="@drawable/ic_action_home"
-        android:title="@string/title_home" />
+        android:title="HOME" />
 
     <item
         android:id="@+id/bottom_nav_notification"
         android:icon="@drawable/ic_action_notification"
-        android:title="@string/title_notification" />
+        android:title="NOTIFICATION" />
 
     <item
         android:id="@+id/bottom_nav_announcement"
         android:icon="@drawable/ic_action_announcement"
-        android:title="@string/title_announcement" />
+        android:title="ANNOUNCEMENT" />
 
     <item
         android:id="@+id/bottom_nav_attendance"
         android:icon="@drawable/ic_action_attendance"
-        android:title="@string/title_attendance" />
+        android:title="ATTENDANCE" />
 
     <item
         android:id="@+id/bottom_nav_profile"
-        android:icon="@drawable/ic_action_profile"
-        android:title="@string/title_profile" />
+        android:icon="@drawable/ic_action_settings"
+        android:title="SETTINGS" />
+
 </menu>

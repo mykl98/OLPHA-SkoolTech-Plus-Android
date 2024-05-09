@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.Launcher"
-        android:usesCleartextTraffic="true">
-        <activity android:name="com.skooltech.OLPHA_skooltechplus.VerifyPhoneActivity" />
-        <activity android:name="com.skooltech.OLPHA_skooltechplus.RegisterActivity" />
-        <activity android:name="com.skooltech.OLPHA_skooltechplus.MainActivity"
-            android:screenOrientation="portrait"
+        android:theme="@style/Theme.olpha_skooltechplus"
+        tools:targetApi="31">
+        <activity android:name=".VerifyNumberActivity"
+            android:exported="false"/>
+        <activity android:name=".RegisterActivity"
+            android:exported="false"/>
+        <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,7 +29,7 @@
         </activity>
 
         <service
-            android:name="com.skooltech.OLPHA_skooltechplus.MyFirebaseMessagingService"
+            android:name=".MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

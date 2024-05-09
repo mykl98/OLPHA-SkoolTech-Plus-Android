@@ -1,15 +1,6 @@
 <resources>
     <string name="app_name">OLPHA SkoolTech Plus</string>
 
-    <string name="title_home">Home</string>
-    <string name="title_notification">Notification</string>
-    <string name="title_announcement">Announcement</string>
-    <string name="title_attendance">Attendance</string>
-    <string name="title_profile">Me</string>
-
-    <string name="school_name">Skooltech Solutions Academy</string>
-    <string name="school_address">Block 16 lot 18-19 Belair Subdivision Buru-un Iligan City</string>
     <string name="school_code">LeBDKSw1rP</string>
-
     <string name="app_api">https://skooltech.com/plus/api/app-api.php</string>
 </resources>

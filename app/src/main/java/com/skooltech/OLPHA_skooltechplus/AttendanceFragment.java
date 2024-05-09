@@ -1,6 +1,7 @@
 package com.skooltech.OLPHA_skooltechplus;
 
 import android.os.Bundle;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,41 +11,67 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 public class AttendanceFragment extends Fragment {
-    GlobalFunctions globalFunctions = new GlobalFunctions(getActivity());
-    View view;
-    @Nullable
+    public AttendanceFragment() {
+        // Required empty public constructor
+    }
+
+    DbHandler db;
+    ListView lv;
+    TextView noData;
+    Spinner spinner;
+
+    String TAG = "Attendance Fragment";
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_attendance, null);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
-        DbHandler db0 = new DbHandler(getActivity());
-        ArrayList<HashMap<String,String>> childList = db0.getChildList();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_attendance, container, false);
 
-        final ArrayList<String> childId = new ArrayList<>();
-        ArrayList<String> childName = new ArrayList<>();
+        db = new DbHandler(getContext());
+        lv = view.findViewById(R.id.fragment_attendance_listview);
+        noData = view.findViewById(R.id.fragment_attendance_no_data);
+        spinner = view.findViewById(R.id.fragment_attendance_spinner);
 
-        for (HashMap<String,String> map : childList){
-            childName.add(globalFunctions.decodeText(map.get("name")));
-            childId.add(map.get("id"));
+        ArrayList<HashMap<String, String>> childList = db.getChildList();
+        ArrayList<String> childIds = new ArrayList<>();
+        ArrayList<String> childNames = new ArrayList<>();
+
+        if(childList.size() > 0){
+            for(HashMap<String, String> map : childList){
+                String id = map.get("id");
+                String name = map.get("name");
+                if(id != null && name != null){
+                    childIds.add(id);
+                    childNames.add(name);
+                }
+            }
+        }else{
+            childNames.add("- No Data -");
+            childIds.add("0");
         }
 
-        Spinner spinner = view.findViewById(R.id.spinner);
-
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_dropdown_item,childName);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerAdapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                childNames
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                renderAttendanceList(childId.get(i));
+                getAttendanceList(childIds.get(i));
             }
 
             @Override
@@ -52,18 +79,22 @@ public class AttendanceFragment extends Fragment {
 
             }
         });
-
+        noData.setText("- No Available Data -");
         return view;
     }
 
-    public void renderAttendanceList(String id){
-        DbHandler db = new DbHandler(getActivity());
-        ArrayList<HashMap<String,String>> attendanceList = db.getAttendanceById(id,50);
-
-        //Log.d("test1234",attendanceList.toString());
-
-        ListView lv = view.findViewById(R.id.attendance_list);
-        ListAdapter adapter = new SimpleAdapter(getActivity(), attendanceList, R.layout.attendance_row,new String[]{"date","day","login","logout"},new int[]{R.id.textViewDate,R.id.textViewDay,R.id.textViewTimeIn,R.id.textViewTimeOut});
-        lv.setAdapter(adapter);
+    private void getAttendanceList(String id){
+        ArrayList<HashMap<String, String>> lists = db.getAttendanceById(id, 100);
+        if(lists.size() > 0){
+            noData.setText("");
+            ListAdapter adapter = new SimpleAdapter(getActivity(),
+                    lists,
+                    R.layout.attendance_row,
+                    new String[]{"date", "day", "login", "logout"},
+                    new int[]{R.id.date, R.id.day, R.id.timein, R.id.timeout});
+            lv.setAdapter(adapter);
+        }else{
+            noData.setText("- No Available Data -");
+        }
     }
 }

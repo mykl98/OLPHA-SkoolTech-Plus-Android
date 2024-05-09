@@ -1,7 +1,6 @@
 package com.skooltech.OLPHA_skooltechplus;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
@@ -17,16 +16,15 @@ import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
-    public static int NOTIFICATION_ID = 1;
-    public static final String CHANNEL_NAME = "SkoolTech Solutions Notification";
+    public static  int NOTIFICATION_ID = 1;
+    public static final String CHANNEL_ID = "SA_skooltech+plus";
+    public static final String CHANNEL_NAME = "SkoolTech Pro Solutions Notification";
     public static final String CHANNEL_DESCRIPTION = "www.skooltech.com";
-    GlobalFunctions gf = new GlobalFunctions(MyFirebaseMessagingService.this);
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
-
-        if (remoteMessage.getData().size() > 0) {
-            Map<String, String> data = remoteMessage.getData();
+    public void onMessageReceived(RemoteMessage remoteMessage){
+        if(remoteMessage.getData().size() > 0){
+            Map<String,String> data = remoteMessage.getData();
 
             String title = data.get("title");
             String body = data.get("body");
@@ -34,33 +32,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             //Save notification to DB
             DbHandler dbHandler = new DbHandler(MyFirebaseMessagingService.this);
-            if (type.equals("notification")) {
+            if(type.equals("notification")){
                 String studentId = data.get("id");
                 String studentName = data.get("name");
                 String activity = data.get("activity");
                 String date = data.get("date");
                 String time = data.get("time");
 
-                dbHandler.insertNotification(title, body, studentName, studentId, activity, time, date, type);
-            } else {
-                dbHandler.insertNotification(title, body, "", "", "", "", "", type);
+                dbHandler.insertNotification(title,body,studentName,studentId,activity,time,date,type);
+            }else{
+                dbHandler.insertNotification(title,body,"","","","","",type);
             }
 
-            //Call method to generate notification
+            body = MainActivity.instance.decodeText(body);
             generateNotification(title, body);
         }
     }
 
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(String token){
         super.onNewToken(token);
-        getSharedPreferences("app", MODE_PRIVATE).edit().putString("fb", token).apply();
-    }
-
-    public String getToken() {
-        //return FirebaseInstanceId.getInstance().getToken();
-        String token = getSharedPreferences("app", MODE_PRIVATE).getString("fb", "");
-        return token;
     }
 
     private void generateNotification(String title, String messageBody) {
@@ -73,7 +64,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.splash_logo))
                 .setSmallIcon(R.drawable.splash_logo)
                 .setContentTitle(title)
-                .setContentText(gf.decodeText(messageBody))
+                .setContentText(messageBody)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);

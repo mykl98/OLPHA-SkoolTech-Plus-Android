@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 
+    <color name="school_color">#007c30</color>
     <color name="colorNavIcon">#434343</color>
     <color name="colorNavText">#A4A4A4</color>
+    <color name="colorPrimary">#008577</color>
 
-    <color name="schoolColor">#007c30</color>
+    <color name="primary">#3B71CA</color>
+    <color name="secondary">#9FA6B2</color>
+    <color name="success">#14A44D</color>
+    <color name="danger">#DC4C64</color>
+    <color name="warning">#E4A11B</color>
+    <color name="info">#54B4D3</color>
+    <color name="light">#FBFBFB</color>
+    <color name="dark">#332D2D</color>
+    <color name="title">#343434</color>
 </resources>

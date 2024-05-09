@@ -1,6 +1,7 @@
 package com.skooltech.OLPHA_skooltechplus;
 
 import android.os.Bundle;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,44 +11,64 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NotificationFragment extends Fragment {
-    GlobalFunctions globalFunctions = new GlobalFunctions(getActivity());
-    View view;
-    @Nullable
+    public NotificationFragment() {
+        // Required empty public constructor
+    }
+
+    Spinner spinner;
+    DbHandler db;
+    ListView lv;
+    TextView noData;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_notification, null);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
-        DbHandler db0 = new DbHandler(getActivity());
-        ArrayList<HashMap<String,String>> childList = db0.getChildList();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_notification, container, false);
 
-        final ArrayList<String> childId = new ArrayList<>();
-        ArrayList<String> childName = new ArrayList<>();
+        db = new DbHandler(getContext());
 
-        childName.add("ALL");
-        childId.add("all");
+        spinner = view.findViewById(R.id.fragment_notification_spinner);
+        lv = view.findViewById(R.id.fragment_notification_listview);
+        noData = view.findViewById(R.id.fragment_notification_no_data);
 
-        for (HashMap<String,String> map : childList){
-            childName.add(globalFunctions.decodeText(map.get("name")));
-            childId.add(map.get("id"));
+        ArrayList<HashMap<String, String>> childList = db.getChildList();
+        ArrayList<String> childIds = new ArrayList<>();
+        ArrayList<String> childNames = new ArrayList<>();
+
+        childIds.add("all");
+        childNames.add("All");
+
+        for(HashMap<String, String> map : childList){
+            String id = map.get("id");
+            String name = map.get("name");
+            if(id != null && name != null){
+                childIds.add(id);
+                childNames.add(name);
+            }
         }
 
-        Spinner spinner = view.findViewById(R.id.spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                childNames
+        );
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_spinner_dropdown_item,childName);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerAdapter);
+        spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                renderNotificationList(childId.get(i));
+                getNotificationList(childIds.get(i));
             }
 
             @Override
@@ -59,28 +80,22 @@ public class NotificationFragment extends Fragment {
         return view;
     }
 
-    public void renderNotificationList(String id){
-        DbHandler db = new DbHandler(getActivity());
-        ArrayList<HashMap<String,String>> notificationList = db.getNotificationByType(id,"notification",50);
+    private void getNotificationList(String id){
+        ArrayList<HashMap<String, String>> lists = db.getNotificationByType(id, "notification", 100);
 
-        ArrayList<HashMap<String,String>> newNotificationList = new ArrayList<>();
+        if(lists.size() > 0){
+            noData.setText("");
+            ListAdapter adapter = new SimpleAdapter(getActivity(),
+                    lists,
+                    R.layout.notification_announcement_row,
+                    new String[]{"title", "body", "icon"},
+                    new int[]{R.id.title, R.id.body, R.id.icon});
 
-        int[] listviewIcon = new int[]{R.drawable.ic_action_notification,R.drawable.ic_action_announcement};
-
-        for(HashMap<String,String> map : notificationList){
-            HashMap<String,String> notification = new HashMap<>();
-            notification.put("title",map.get("title"));
-            notification.put("body",globalFunctions.decodeText(map.get("body")));
-            if (map.get("type").equals("notification")){
-                notification.put("image", Integer.toString(listviewIcon[0]));
-            }else{
-                notification.put("image", Integer.toString(listviewIcon[1]));
-            }
-            newNotificationList.add(notification);
+            lv.setAdapter(adapter);
+        }else{
+            noData.setText("- No Available Data -");
         }
-
-        ListView lv = view.findViewById(R.id.notification_list);
-        ListAdapter adapter = new SimpleAdapter(getActivity(), newNotificationList, R.layout.notification_row,new String[]{"title","body","image"},new int[]{R.id.title,R.id.body,R.id.icon});
-        lv.setAdapter(adapter);
     }
 }
+
+

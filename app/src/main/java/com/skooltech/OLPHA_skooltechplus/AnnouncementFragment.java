@@ -1,54 +1,57 @@
 package com.skooltech.OLPHA_skooltechplus;
 
 import android.os.Bundle;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AnnouncementFragment extends Fragment {
-    GlobalFunctions globalFunctions = new GlobalFunctions(getActivity());
-    View view;
-    @Nullable
+    public AnnouncementFragment() {
+        // Required empty public constructor
+    }
+
+
+    DbHandler db;
+    ListView lv;
+    TextView noData;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_announcement, null);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
-        renderNotificationList("all");
-
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_announcement, container, false);
+        db = new DbHandler(getContext());
+        lv = view.findViewById(R.id.fragment_announcement_listview);
+        noData = view.findViewById(R.id.fragment_announcement_no_data);
+        getAnnouncementList();
         return view;
     }
 
-    public void renderNotificationList(String id){
-        DbHandler db = new DbHandler(getActivity());
-        ArrayList<HashMap<String,String>> notificationList = db.getNotificationByType(id,"announcement",50);
+    private void getAnnouncementList(){
+        ArrayList<HashMap<String, String>> lists = db.getNotificationByType("all", "announcement", 100);
+        if(lists.size() > 0){
+            noData.setText("");
+            ListAdapter adapter = new SimpleAdapter(getActivity(),
+                    lists,
+                    R.layout.notification_announcement_row,
+                    new String[]{"title", "body", "icon"},
+                    new int[]{R.id.title, R.id.body, R.id.icon});
 
-        ArrayList<HashMap<String,String>> newNotificationList = new ArrayList<>();
-
-        int[] listviewIcon = new int[]{R.drawable.ic_action_notification,R.drawable.ic_action_announcement};
-
-        for(HashMap<String,String> map : notificationList){
-            HashMap<String,String> notification = new HashMap<>();
-            notification.put("title",map.get("title"));
-            notification.put("body",globalFunctions.decodeText(map.get("body")));
-            if (map.get("type").equals("notification")){
-                notification.put("image", Integer.toString(listviewIcon[0]));
-            }else{
-                notification.put("image", Integer.toString(listviewIcon[1]));
-            }
-            newNotificationList.add(notification);
+            lv.setAdapter(adapter);
+        }else{
+            noData.setText("- No Available Data -");
         }
-
-        ListView lv = view.findViewById(R.id.notification_list);
-        ListAdapter adapter = new SimpleAdapter(getActivity(), newNotificationList, R.layout.notification_row,new String[]{"title","body","image"},new int[]{R.id.title,R.id.body,R.id.icon});
-        lv.setAdapter(adapter);
     }
 }

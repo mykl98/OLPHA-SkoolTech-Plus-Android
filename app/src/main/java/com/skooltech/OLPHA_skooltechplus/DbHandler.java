@@ -1,5 +1,6 @@
 package com.skooltech.OLPHA_skooltechplus;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -27,7 +28,9 @@ public class DbHandler extends SQLiteOpenHelper {
     private static final String KEY_DATE = "date";
     private static final String KEY_TYPE = "type";
 
-    public  DbHandler(Context context){
+    int[] listviewIcon = new int[]{R.drawable.ic_action_notification, R.drawable.ic_action_announcement};
+
+    public DbHandler(Context context){
         super(context, DB_NAME, null, DB_VERSION);
     }
 
@@ -59,8 +62,6 @@ public class DbHandler extends SQLiteOpenHelper {
     }
 
     void insertNotification(String title, String body, String name, String studentid, String activity, String time, String date, String type){
-        Log.d("test1234",studentid);
-        Log.d("test1234",name);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues val = new ContentValues();
         val.put(KEY_TITLE, title);
@@ -76,6 +77,7 @@ public class DbHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    @SuppressLint("Range")
     public ArrayList<HashMap<String,String>> getDatabase(){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String,String>> dataList = new ArrayList<>();
@@ -96,7 +98,8 @@ public class DbHandler extends SQLiteOpenHelper {
         return dataList;
     }
 
-    public ArrayList<HashMap<String,String>> getNotification(String student, int limit){
+    @SuppressLint("Range")
+    public ArrayList<HashMap<String,String>> getAllNotification(String student, int limit){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String,String>> notificationList = new ArrayList<>();
         String query;
@@ -110,20 +113,39 @@ public class DbHandler extends SQLiteOpenHelper {
         }
         while (cursor.moveToNext()){
             HashMap<String,String> notification = new HashMap<>();
-            notification.put("title", cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
-            notification.put("body", cursor.getString(cursor.getColumnIndex(KEY_BODY)));
-            notification.put("type", cursor.getString(cursor.getColumnIndex(KEY_TYPE)));
+            String title = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
+            String body = cursor.getString(cursor.getColumnIndex(KEY_BODY));
+            String type = cursor.getString(cursor.getColumnIndex(KEY_TYPE));
+
+            if(title != null){
+                title = MainActivity.instance.decodeText(title);
+            }
+
+            if(body != null){
+                body = MainActivity.instance.decodeText(body);
+            }
+
+            notification.put("title", title);
+            notification.put("body", body);
+
+            if(type.equals("notification")){
+                notification.put("icon", Integer.toString(listviewIcon[0]));
+            }else{
+                notification.put("icon", Integer.toString(listviewIcon[1]));
+            }
+
             notificationList.add(notification);
         }
         return notificationList;
     }
 
+    @SuppressLint("Range")
     public ArrayList<HashMap<String,String>> getNotificationByType(String student, String type, int limit){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String,String>> notificationList = new ArrayList<>();
         String query;
         Cursor cursor;
-        if (student == "all") {
+        if (student.equals("all")) {
             query = "SELECT title, body, type FROM " + DB_NAME + " WHERE type = ? ORDER BY id DESC LIMIT " + limit;
             cursor = db.rawQuery(query, new String[]{type});
         }else{
@@ -132,14 +154,33 @@ public class DbHandler extends SQLiteOpenHelper {
         }
         while (cursor.moveToNext()){
             HashMap<String,String> notification = new HashMap<>();
-            notification.put("title", cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
-            notification.put("body", cursor.getString(cursor.getColumnIndex(KEY_BODY)));
-            notification.put("type", cursor.getString(cursor.getColumnIndex(KEY_TYPE)));
+            String title = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
+            String body = cursor.getString(cursor.getColumnIndex(KEY_BODY));
+
+            if(title != null){
+                title = MainActivity.instance.decodeText(title);
+            }
+
+            if(body != null){
+                body = MainActivity.instance.decodeText(body);
+            }
+
+            notification.put("title", title);
+            notification.put("body", body);
+
+            if(type.equals("notification")){
+                notification.put("icon", Integer.toString(listviewIcon[0]));
+            }else{
+                notification.put("icon", Integer.toString(listviewIcon[1]));
+            }
+
             notificationList.add(notification);
         }
+        cursor.close();
         return notificationList;
     }
 
+    @SuppressLint("Range")
     public ArrayList<HashMap<String,String>> getChildList(){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String,String>> childList = new ArrayList<>();
@@ -148,13 +189,16 @@ public class DbHandler extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()){
             HashMap<String,String> child = new HashMap<>();
+            String id = cursor.getString(cursor.getColumnIndex(KEY_STUDENT_ID));
             child.put("id", cursor.getString(cursor.getColumnIndex(KEY_STUDENT_ID)));
             child.put("name", cursor.getString(cursor.getColumnIndex(KEY_NAME)));
             childList.add(child);
         }
+        cursor.close();
         return childList;
     }
 
+    @SuppressLint("Range")
     public ArrayList<HashMap<String,String>> getAttendanceById(String id, int limit){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String,String>> attendanceList = new ArrayList<>();
@@ -197,7 +241,7 @@ public class DbHandler extends SQLiteOpenHelper {
 
             switch (_day){
                 case 1: day = "Sunday";
-                        break;
+                    break;
                 case 2: day = "Monday";
                     break;
                 case 3: day = "Tuesday";

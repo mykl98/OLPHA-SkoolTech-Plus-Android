@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/school_color"
     android:fitsSystemWindows="true"
-    tools:context=".RegisterActivity">
+    tools:context=".VerifyNumberActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,55 +36,54 @@
                     android:textColor="@color/black"
                     android:layout_marginBottom="20dp"
                     android:textStyle="bold"
-                    android:text="REGISTER"/>
+                    android:text="VERIFICATION"/>
 
-                <TextView
-                    android:layout_width="match_parent"
+                <com.chaos.view.PinView
+                    android:id="@+id/verify_activity_otp_edittext"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12dp"
-                    android:textColor="@color/black"
-                    android:text="Mobile Number"/>
-
-                <EditText
-                    android:id="@+id/register_activity_phone_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20dp"
-                    android:textAlignment="center"
-                    android:hint="09061234567"
+                    app:itemCount="6"
+                    app:itemWidth="40dp"
+                    app:itemHeight="60dp"
+                    android:layout_gravity="center_horizontal"
                     android:inputType="number"
-                    android:textColor="@color/black"/>
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:textSize="30sp"
+                    android:layout_marginBottom="10dp"/>
 
                 <LinearLayout
-                    android:id="@+id/register_activity_status_container"
+                    android:id="@+id/verify_activity_status_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:gravity="center_horizontal"
                     android:visibility="gone">
 
                     <TextView
-                        android:id="@+id/register_activity_status_text"
+                        android:id="@+id/verify_activity_status_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/info"
-                        android:text="Checking phone number... "/>
+                        android:text="Verifying OTP code... "/>
 
                     <ProgressBar
-                        android:id="@+id/register_activity_progress_bar"
                         style="?android:attr/progressBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:foregroundTint="@color/info"/>
+
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/register_activity_continue_button"
+                    android:id="@+id/verify_activity_register_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:textColor="@color/white"
                     android:backgroundTint="@color/school_color"
-                    android:text="Continue"/>
+                    android:textColor="@color/white"
+                    android:padding="10dp"
+                    android:text="Register"
+                    android:layout_marginTop="10dp"/>
 
             </LinearLayout>
 
