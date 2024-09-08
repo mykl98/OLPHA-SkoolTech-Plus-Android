@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity{
                     params.put("id", getResources().getString(R.string.school_code));
                     params.put("number", number);
 
-                    requestAPI(params, new APICallback() {
+                    MainActivity.instance.requestAPI(params, new MainActivity.APICallback() {
                         @Override
                         public void onSuccess(String result) {
                             continueButton.setEnabled(true);
@@ -82,8 +82,8 @@ public class RegisterActivity extends AppCompatActivity{
                                 editor.putString("number", number);
                                 editor.commit();
                                 gotoVerifyNumberActivity();
-                            }else if(result.equals("false")){
-                                phoneNumber.setError("Unauthorized phone number!");
+                            }else{
+                                phoneNumber.setError(result);
                             }
                             hideStatus();
                         }
@@ -113,49 +113,6 @@ public class RegisterActivity extends AppCompatActivity{
 
     private void hideStatus(){
         statusContainer.setVisibility(View.GONE);
-    }
-
-    private void requestAPI(Map<String, String> parameters, final RegisterActivity.APICallback callback){
-        String url = getString(R.string.app_api);
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        String[] resp = response.split("\\*_\\*");
-                        if(resp[0].equals("true")){
-                            callback.onSuccess("true");
-                        }else if(resp[0].equals("false")){
-                            callback.onSuccess("false");
-                        }else{
-                            callback.onError(response);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        callback.onError(error.getLocalizedMessage());
-                    }
-                }
-        ){
-            @Override
-            protected Map<String,String> getParams() {
-                return parameters;
-            }
-        };
-
-        if(requestQueue == null){
-            requestQueue = Volley.newRequestQueue(RegisterActivity.this);
-        }
-        requestQueue.getCache().clear();
-        requestQueue.add(postRequest);
-    }
-
-    public interface APICallback{
-        void onSuccess(String result);
-
-        void onError(String error);
     }
 }
 

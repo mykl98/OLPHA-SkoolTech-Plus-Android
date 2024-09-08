@@ -41,7 +41,6 @@ public class VerifyNumberActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
 
-    String number;
     String phoneNumber;
 
     PinView otpCode;
@@ -52,13 +51,7 @@ public class VerifyNumberActivity extends AppCompatActivity {
 
     String otp;
 
-    String TAG = "Verify Number Activity";
-
-    String mVerificationId;
-
-    RequestQueue requestQueue;
-
-    MainActivity mainActivity;
+    String TAG = ">>>>>Verify Number Activity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +63,7 @@ public class VerifyNumberActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         phoneNumber = sharedPreferences.getString("number", "");
-        number = phoneNumber.substring(1);
-        number = "+63" + number;
+        sendOtpCode();
 
         statusContainer = findViewById(R.id.verify_activity_status_container);
         statusText = findViewById(R.id.verify_activity_status_text);
@@ -103,81 +95,74 @@ public class VerifyNumberActivity extends AppCompatActivity {
                 }if(otp.length() != 6){
                     otpCode.setError("Invalid OTP Ccode");
                 }else{
-                    if(mVerificationId != null){
-                        statusContainer.setVisibility(View.VISIBLE);
-                        registerButton.setEnabled(false);
-                        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, otp);
-                        signInWithPhoneAuthCredential(credential);
-                    }
+                    statusContainer.setVisibility(View.VISIBLE);
+                    registerButton.setEnabled(false);
+
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put("activity", "validateotp");
+                    params.put("id", getResources().getString(R.string.school_code));
+                    params.put("otp", otp);
+                    params.put("number", phoneNumber);
+
+                    MainActivity.instance.requestAPI(params, new MainActivity.APICallback() {
+                        @Override
+                        public void onSuccess(String result) {
+                            if(result.equals("true")){
+                                registerToServer();
+                            }else{
+                                otpCode.setError(result);
+                                statusContainer.setVisibility(View.INVISIBLE);
+                                registerButton.setEnabled(true);
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            otpCode.setError(error);
+                        }
+                    });
+
                 }
             }
         });
-        sendOtpCode();
     }
 
     private void sendOtpCode(){
-        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
-                .setPhoneNumber(number)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(mCallbacks)
-                .build();
-        PhoneAuthProvider.verifyPhoneNumber(options);
-    }
+        HashMap<String, String> params = new HashMap<>();
+        params.put("activity", "sendotp");
+        params.put("id", getResources().getString(R.string.school_code));
+        params.put("number", phoneNumber);
 
-    private final PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-        @Override
-        public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-            String code = phoneAuthCredential.getSmsCode();
-            if(code != null){
-                otpCode.setText(code);
-                statusContainer.setVisibility(View.VISIBLE);
-                registerButton.setEnabled(false);
-                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
-                signInWithPhoneAuthCredential(credential);
+        MainActivity.instance.requestAPI(params, new MainActivity.APICallback() {
+            @Override
+            public void onSuccess(String result) {
+                if(!result.equals("true")){
+                    otpCode.setError(result);
+                }
             }
-        }
 
-        @Override
-        public void onVerificationFailed(@NonNull FirebaseException e) {
-            otpCode.setError(e.getMessage());
-        }
-
-        @Override
-        public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken token){
-            mVerificationId = verificationId;
-        }
-    };
-
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential){
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(VerifyNumberActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            registerToServer();
-                        }else{
-                            statusContainer.setVisibility(View.GONE);
-                            registerButton.setEnabled(true);
-                            if(task.getException() instanceof FirebaseAuthInvalidCredentialsException){
-                                Toast.makeText(VerifyNumberActivity.this, "Invalid code entered", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }
-                });
+            @Override
+            public void onError(String error) {
+                otpCode.setError(error);
+            }
+        });
     }
 
     private void registerToServer(){
         String token = sharedPreferences.getString("token", "");
-        editor.putString("token", token);
-        editor.commit();
+        if(token.isEmpty()){
+            statusContainer.setVisibility(View.GONE);
+            MainActivity.instance.showOkDialog(false, "OTP Verification failed!\nTry Again");
+            return;
+        }
         HashMap<String, String> params = new HashMap<>();
         params.put("activity", "register");
         params.put("id", getResources().getString(R.string.school_code));
         params.put("number", phoneNumber);
         params.put("token", token);
 
-        requestAPI(params, new VerifyNumberActivity.APICallback() {
+        MainActivity.instance.requestAPI(params, new MainActivity.APICallback(){
+
             @Override
             public void onSuccess(String result) {
                 if(result.equals("true")){
@@ -191,57 +176,16 @@ public class VerifyNumberActivity extends AppCompatActivity {
             }
 
             @Override
-
             public void onError(String error) {
                 statusContainer.setVisibility(View.GONE);
             }
         });
+
     }
 
     private void gotoMainActivity(){
         Intent intent = new Intent(VerifyNumberActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-    }
-
-    private void requestAPI(Map<String, String> parameters, final VerifyNumberActivity.APICallback callback){
-        String url = getString(R.string.app_api);
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        String[] resp = response.split("\\*_\\*");
-                        if(resp[0].equals("true")){
-                            callback.onSuccess("true");
-                        }else{
-                            callback.onError(response);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        callback.onError(error.getLocalizedMessage());
-                    }
-                }
-        ){
-            @Override
-            protected Map<String,String> getParams() {
-                return parameters;
-            }
-        };
-
-        if(requestQueue == null){
-            requestQueue = Volley.newRequestQueue(this);
-        }
-        requestQueue.getCache().clear();
-        requestQueue.add(postRequest);
-    }
-
-    public interface APICallback{
-        void onSuccess(String result);
-
-        void onError(String error);
     }
 }
